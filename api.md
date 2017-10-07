@@ -25,7 +25,7 @@ Example:
 
 ### Question Answer PUT
 
-/users PUT
+/users/update PUT
 Sent when user submits a response to a question
 
 ### Parameters

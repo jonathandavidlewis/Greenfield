@@ -1,6 +1,8 @@
+var MongoClient = require('mongodb').MongoClient;
+var url = require('../config.js').dbUrl;
 var chai = require('chai');
 var expect = chai.expect;
-//var request = require('supertest');
+var request = require('supertest');
 var app = require('../app.js');
 var Users = require('../src/server/db/models/users.js');
 var UserUtils = require('../src/server/db/utils/users-helpers.js');
@@ -14,31 +16,31 @@ console.log('Testing is listening on', app.get('port'));   //starts the app.
 
 var testUsers = [
   {
-    displayName: user._json.displayName,
-    email: user._json.emails[0].value,
+    displayName: 'John Doe',
+    email: 'johndoe@gmail.com',
     score: 0,
-    token: user._json.etag.split('"').join(''), // Trims token from '"someToken"' to resemble a simple string. May have unintended consequences down the road.-ZB
-    image: user._json.image.url,
+    token: "abc123",
+    image: 'http://google.com/image.jpg',
     questionsAnswered: [],
     questionsAttempted: 0,
     questionsCorrect: 0
   },
   {
-    displayName: user._json.displayName,
-    email: user._json.emails[0].value,
+    displayName: 'Jane Doe',
+    email: 'janedoe@gmail.com',
     score: 0,
-    token: user._json.etag.split('"').join(''), // Trims token from '"someToken"' to resemble a simple string. May have unintended consequences down the road.-ZB
-    image: user._json.image.url,
+    token: "abc1234",
+    image: 'http://google.com/image.jpg',
     questionsAnswered: [],
     questionsAttempted: 0,
     questionsCorrect: 0
   },
   {
-    displayName: user._json.displayName,
-    email: user._json.emails[0].value,
+    displayName: 'Jason Doe',
+    email: 'jasondoe@gmail.com',
     score: 0,
-    token: user._json.etag.split('"').join(''), // Trims token from '"someToken"' to resemble a simple string. May have unintended consequences down the road.-ZB
-    image: user._json.image.url,
+    token: "abc12345",
+    image: 'http://google.com/image.jpg',
     questionsAnswered: [],
     questionsAttempted: 0,
     questionsCorrect: 0
@@ -52,18 +54,7 @@ var getBody = function (res) {
 };
 
 
-MongoClient.connect(url, function(err, db) {
-  if (err) {
-    console.log(err);
-  } else {
-    console.log('Connected to MongoDB server');
-    signupUser(db, testUser, function() {
-      //inserts user to table
-      console.log('Signed Up new user with email:', testUser.email);
-      db.close();
-    });
-  }
-});
+
 
 
 
@@ -83,7 +74,21 @@ describe('RESTful API', function () {
     // Send a deep copy in so internal mutations do not affect our `testUsers` array above
     // Note: This copy technique works because we don't have any functions
     var usersCopy = JSON.parse(JSON.stringify(testUsers));
-    UserUtils.signupUser(db, user, callback);
+    usersCopy.forEach(function(testUser) {
+
+      MongoClient.connect(url, function(err, db) {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log('Connected to MongoDB server');
+          UserUtils.signupUser(db, testUser, function() {
+            //inserts user to table
+            console.log('Signed Up new user with email:', testUser.email);
+            db.close();
+          });
+        }
+      });
+    });
   });
 
   describe('/users', function () {
@@ -103,8 +108,14 @@ describe('RESTful API', function () {
     describe('POST', function () {
 
       var newUser = {
-        name: 'Josh',
-        email: 'josh@josh.io'
+        displayName: 'Jason Doe',
+        email: 'jasondoe@gmail.com',
+        score: 0,
+        token: "abc12345",
+        image: 'http://google.com/image.jpg',
+        questionsAnswered: [],
+        questionsAttempted: 0,
+        questionsCorrect: 0
       };
 
       it('responds with a 201 (Created) when a valid user is sent', function (done) {
@@ -120,11 +131,11 @@ describe('RESTful API', function () {
 
   });
 
-  describe('/users', function () {
+  describe('/users/update', function () {
 
-    describe('GET', function () {
+    describe('PUT', function () {
 
-      it('responds with a 200 (OK) when a user with a matching `id` exists', function (done) {
+      it('responds with a 200 (OK) when a user with a matching `email` exists', function (done) {
 
         request(app)
           .get('/api/users/1')
