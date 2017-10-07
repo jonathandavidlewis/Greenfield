@@ -1,7 +1,6 @@
-var _ = require('underscore');
 var chai = require('chai');
 var expect = chai.expect;
-var Users = require('../models/users.js');
+var Users = require('../src/server/db/models/users.js');
 
 // Adds support for assertions on array elements
 // https://github.com/chaijs/Chai-Things#examples
@@ -14,17 +13,17 @@ describe('Users Model', function () {
   beforeEach(function () {
     testUsers = [
       {
-        id: 1,
+        _id: 1,
         name: 'Taka',
         email: 'taka@taka.com'
       },
       {
-        id: 2,
+        _id: 2,
         name: 'Nayo',
         email: 'nayo@nayo.com'
       },
       {
-        id: 3,
+        _id: 3,
         name: 'Amrit',
         email: 'amrit@amrit.com'
       }
@@ -32,6 +31,4 @@ describe('Users Model', function () {
 
     Users.setAll(testUsers);
   });
-
-  // Fill this out if you like..
 });
